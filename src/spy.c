@@ -13,7 +13,7 @@
 
 struct spy {
   Item item;
-  size_t number_uses;
+  position_t position;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -24,7 +24,7 @@ Spy new_spy(Item item) {
   Spy spy = malloc(sizeof(*spy));
 
   spy->item = item;
-  spy->number_uses = 0;
+  spy->position = (position_t) {0, 0};
 
   return spy;
 }
@@ -34,7 +34,7 @@ Spy new_spy(Item item) {
 void delete_spy(Spy spy) {
   if (spy == NULL) return;
 
-  spy->number_uses = 0;
+  spy->position = (position_t) {0, 0};
   spy->item = NULL;
 
   free(spy);
@@ -45,16 +45,21 @@ void delete_spy(Spy spy) {
 position_t get_spy_position(Spy spy) {
   if (spy == NULL) return (position_t) INVALID_POSITION;
 
-  position_t item_position = get_item_position(spy->item);
-  spy->number_uses++;
-
-  return item_position;
+  return spy->position;
 }
 
 /*----------------------------------------------------------------------------*/
 
-size_t get_spy_number_uses(Spy spy) {
+void set_spy_position(Spy spy, position_t position) {
+  if (spy == NULL) return;
+
+  spy->position = position;
+}
+
+/*----------------------------------------------------------------------------*/
+
+Item get_spy_item(Spy spy) {
   if (spy == NULL) return 0;
 
-  return spy->number_uses;
+  return spy->item;
 }

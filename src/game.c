@@ -23,8 +23,6 @@
 struct game {
   Field field;
 
-  size_t max_number_spies;
-
   PlayerStrategy execute_attacker_strategy;
   PlayerStrategy execute_defender_strategy;
 
@@ -42,7 +40,6 @@ struct game {
 
 Game allocate_game(
   dimension_t field_dimension,
-  size_t max_number_spies,
   PlayerStrategy execute_attacker_strategy,
   PlayerStrategy execute_defender_strategy);
 
@@ -70,12 +67,10 @@ void move_item(Field field,
 
 Game new_game(
     dimension_t field_dimension,
-    size_t max_number_spies,
     PlayerStrategy execute_attacker_strategy,
     PlayerStrategy execute_defender_strategy) {
   Game game = allocate_game(
       field_dimension,
-      max_number_spies,
       execute_attacker_strategy,
       execute_defender_strategy);
 
@@ -90,7 +85,6 @@ Game new_game(
 
 Game new_game_from_map(
     Map map,
-    size_t max_number_spies,
     PlayerStrategy execute_attacker_strategy,
     PlayerStrategy execute_defender_strategy) {
   if (map == NULL) return NULL;
@@ -99,7 +93,6 @@ Game new_game_from_map(
 
   Game game = allocate_game(
       field_dimension,
-      max_number_spies,
       execute_attacker_strategy,
       execute_defender_strategy);
 
@@ -149,8 +142,6 @@ void delete_game(Game game) {
   game->execute_defender_strategy = NULL;
   game->execute_attacker_strategy = NULL;
 
-  game->max_number_spies = 0;
-
   delete_field(game->field);
   game->field = NULL;
 
@@ -173,6 +164,9 @@ void play_game(Game game, size_t max_turns) {
   printf("Turn 0\n");
   print_game(game);
 
+  set_spy_position(game->defender_spy, get_item_position(game->defender));
+  set_spy_position(game->attacker_spy, get_item_position(game->attacker));
+
   for (size_t turn = 0; turn < max_turns; turn++) {
     printf("Turn %ld\n", turn+1);
 
@@ -187,22 +181,6 @@ void play_game(Game game, size_t max_turns) {
               game->execute_defender_strategy);
 
     print_game(game);
-
-    if (has_spy_exceeded_max_number_uses(
-          game->defender_spy, game->max_number_spies)) {
-      printf("GAME OVER! Attacker cheated spying more than %ld %s!\n",
-             game->max_number_spies,
-             game->max_number_spies == 1UL ? "time" : "times");
-      return;
-    }
-
-    if (has_spy_exceeded_max_number_uses(
-          game->attacker_spy, game->max_number_spies)) {
-      printf("GAME OVER! Defender cheated spying more than %ld %s!\n",
-             game->max_number_spies,
-             game->max_number_spies == 1UL ? "time" : "times");
-      return;
-    }
 
     if (has_attacker_arrived_end_field(game->field, game->attacker)) {
       printf("GAME OVER! Attacker wins!\n");
@@ -225,14 +203,11 @@ void play_game(Game game, size_t max_turns) {
 
 Game allocate_game(
     dimension_t field_dimension,
-    size_t max_number_spies,
     PlayerStrategy execute_attacker_strategy,
     PlayerStrategy execute_defender_strategy) {
   Game game = malloc(sizeof(*game));
 
   game->field = new_field(field_dimension);
-
-  game->max_number_spies = max_number_spies;
 
   game->execute_attacker_strategy = execute_attacker_strategy;
   game->execute_defender_strategy = execute_defender_strategy;
@@ -353,13 +328,6 @@ void set_obstacles_in_field(Field field, Item obstacle) {
 
 /*----------------------------------------------------------------------------*/
 
-bool has_spy_exceeded_max_number_uses(Spy opponent_spy,
-                                      size_t max_number_spies) {
-  return get_spy_number_uses(opponent_spy) > max_number_spies;
-}
-
-/*----------------------------------------------------------------------------*/
-
 bool has_defender_captured_attacker(Item defender, Item attacker) {
   if (attacker == NULL || defender == NULL) return false;
 
@@ -391,7 +359,12 @@ void move_item(Field field,
   direction_t item_direction
     = execute_item_strategy(item_position, opponent_spy);
 
-  move_item_in_field(field, item, item_direction);
+  if (equal_directions(item_direction, (direction_t) DIR_STAY)){
+    set_spy_position(opponent_spy, get_item_position(get_spy_item(opponent_spy)));
+  }
+  else {
+    move_item_in_field(field, item, item_direction);
+  }
 }
 
 /*----------------------------------------------------------------------------*/

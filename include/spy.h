@@ -21,6 +21,7 @@ Spy new_spy(Item item);
 void delete_spy(Spy spy);
 
 position_t get_spy_position(Spy spy);
-size_t get_spy_number_uses(Spy spy);
+void set_spy_position(Spy spy, position_t position);
+Item get_spy_item(Spy);
 
 #endif // SPY_H

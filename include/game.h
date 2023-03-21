@@ -28,13 +28,11 @@ typedef direction_t (*PlayerStrategy)(position_t, Spy);
 // Functions
 Game new_game(
     dimension_t field_dimension,
-    size_t max_number_spies,
     PlayerStrategy attacker_strategy,
     PlayerStrategy defender_strategy);
 
 Game new_game_from_map(
     Map map,
-    size_t max_number_spies,
     PlayerStrategy attacker_strategy,
     PlayerStrategy defender_strategy);
 

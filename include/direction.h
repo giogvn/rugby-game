@@ -1,6 +1,9 @@
 #ifndef DIRECTION_H
 #define DIRECTION_H
 
+// Standard headers
+#include <stdbool.h>
+
 // Structs
 
 /**
@@ -22,5 +25,8 @@ typedef struct direction direction_t;
 #define DIR_DOWN_LEFT  {  1, -1 }
 #define DIR_LEFT       {  0, -1 }
 #define DIR_UP_LEFT    { -1, -1 }
+
+// Functions
+bool equal_directions(direction_t d1, direction_t d2);
 
 #endif // DIRECTION_H

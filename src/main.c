@@ -12,7 +12,6 @@
 
 // Macros
 #define STANDARD_FIELD_DIMENSION (dimension_t) { 10, 10 }
-#define STANDARD_MAX_NUMBER_SPIES 1LU
 #define STANDARD_MAX_TURNS 42
 
 /*----------------------------------------------------------------------------*/
@@ -61,7 +60,6 @@ Game choose_game(int argc, char** argv) {
 Game make_standard_game() {
   Game game = new_game(
       STANDARD_FIELD_DIMENSION,
-      STANDARD_MAX_NUMBER_SPIES,
       execute_attacker_strategy,
       execute_defender_strategy);
 
@@ -75,7 +73,6 @@ Game make_game_from_map(const char* map_path) {
 
   Game game = new_game_from_map(
       map,
-      STANDARD_MAX_NUMBER_SPIES,
       execute_attacker_strategy,
       execute_defender_strategy);
 
