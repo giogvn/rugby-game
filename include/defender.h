@@ -2,6 +2,7 @@
 #define DEFENDER_H
 
 // Internal headers
+#include "dimension.h"
 #include "position.h"
 #include "spy.h"
 
@@ -12,7 +13,12 @@
  * Given the player position, it should decide the next direction
  * they will take in the field.
  */
+typedef struct defender* Defender;
+
 direction_t execute_defender_strategy(position_t defender_position,
-                                      Spy attacker_spy);
+                                      Spy attacker_spy,
+                                      void* data);
+
+Defender new_defender(dimension_t dimension, char* map_data);
 
 #endif // DEFENDER_H

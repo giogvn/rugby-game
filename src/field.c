@@ -102,6 +102,21 @@ void print_field_grid(Field field) {
 
 /*----------------------------------------------------------------------------*/
 
+char* string_field(Field field) {
+  if (field == NULL) return (char*)NULL;
+
+  char *field_string = (char *)malloc(field->dimension.height * field->dimension.width * sizeof(char));
+
+  for (size_t i = 0; i < field->dimension.height; i++) {
+    for (size_t j = 0; j < field->dimension.width; j++) {
+      field_string[i * field->dimension.height + j] = get_item_symbol(field->grid[i][j]);
+    }
+  }
+  return field_string;
+}
+
+/*----------------------------------------------------------------------------*/
+
 void add_item_to_field(Field field, Item item, position_t position) {
   if (field == NULL || item == NULL) return;
 

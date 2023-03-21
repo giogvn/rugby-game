@@ -28,6 +28,8 @@ dimension_t get_field_dimension(Field field);
 void print_field_info(Field field);
 void print_field_grid(Field field);
 
+char* string_field(Field field);
+
 void add_item_to_field(Field field, Item item, position_t position);
 void move_item_in_field(Field field, Item item, direction_t direction);
 

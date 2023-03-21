@@ -23,7 +23,7 @@ typedef struct game* Game;
  * given its current position in a Field. Aditionally, players can spy
  * on its opponent positions **at most** MAX_NUMBER_SPIES times.
  */
-typedef direction_t (*PlayerStrategy)(position_t, Spy);
+typedef direction_t (*PlayerStrategy)(position_t, Spy, void* data);
 
 // Functions
 Game new_game(

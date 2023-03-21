@@ -5,9 +5,16 @@
 #include <stdlib.h>
 
 // Internal headers
+#include "position.h"
+#include "direction.h"
+#include "dimension.h"
 #include "field.h"
+#include "item.h"
 #include "map.h"
 #include "spy.h"
+
+#include "attacker.h"
+#include "defender.h"
 
 // Main header
 #include "game.h"
@@ -32,6 +39,10 @@ struct game {
 
   Spy attacker_spy;
   Spy defender_spy;
+
+  Attacker attacker_data;
+  Defender defender_data;
+
 };
 
 /*----------------------------------------------------------------------------*/
@@ -59,7 +70,8 @@ bool has_attacker_arrived_end_field(Field field, Item attacker);
 void move_item(Field field,
                Item item,
                Spy opponent_spy,
-               PlayerStrategy execute_item_strategy);
+               PlayerStrategy execute_item_strategy,
+               void* data);
 
 /*----------------------------------------------------------------------------*/
 /*                              PUBLIC FUNCTIONS                              */
@@ -74,9 +86,17 @@ Game new_game(
       execute_attacker_strategy,
       execute_defender_strategy);
 
+  set_obstacles_in_field(game->field, game->obstacle);
+
+  char* field_string = string_field(game->field);
+
+  game->attacker_data = new_attacker(field_dimension, field_string);
+  game->defender_data = new_defender(field_dimension, field_string);
+
+  free(field_string);
+
   set_attacker_in_field(game->field, game->attacker);
   set_defender_in_field(game->field, game->defender);
-  set_obstacles_in_field(game->field, game->obstacle);
 
   return game;
 }
@@ -112,9 +132,10 @@ Game new_game_from_map(
     return NULL;
   }
 
+  set_item_in_field_from_map(game->field, game->obstacle, map);
+
   set_item_in_field_from_map(game->field, game->attacker, map);
   set_item_in_field_from_map(game->field, game->defender, map);
-  set_item_in_field_from_map(game->field, game->obstacle, map);
 
   return game;
 }
@@ -173,12 +194,14 @@ void play_game(Game game, size_t max_turns) {
     move_item(game->field,
               game->attacker,
               game->defender_spy,
-              game->execute_attacker_strategy);
+              game->execute_attacker_strategy,
+              game->attacker_data);
 
     move_item(game->field,
               game->defender,
               game->attacker_spy,
-              game->execute_defender_strategy);
+              game->execute_defender_strategy,
+              game->defender_data);
 
     print_game(game);
 
@@ -353,11 +376,12 @@ bool has_attacker_arrived_end_field(Field field, Item attacker) {
 void move_item(Field field,
                Item item,
                Spy opponent_spy,
-               PlayerStrategy execute_item_strategy) {
+               PlayerStrategy execute_item_strategy,
+               void* data) {
   position_t item_position = get_item_position(item);
 
   direction_t item_direction
-    = execute_item_strategy(item_position, opponent_spy);
+    = execute_item_strategy(item_position, opponent_spy, data);
 
   if (equal_directions(item_direction, (direction_t) DIR_STAY)){
     set_spy_position(opponent_spy, get_item_position(get_spy_item(opponent_spy)));
