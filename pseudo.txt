@@ -1,0 +1,59 @@
+Que informações o atacante deve receber na sua função de estratégia?
+- Sua posição atual no mapa;
+- Próximo estado ótimo
+- Razão entre o [número de jogadas desde a última espiada] e o [menor 
+    número possível de jogadas até a sua vitória]
+- Limite para a razão entre o [número de jogadas desde a última espiada]
+    e o [menor número possível de jogadas até a sua vitória]. Chama-se
+    esse limite de [incerteza permitida]
+
+
+procura_melhor_acao(tipo_jogador, novo_mapa):
+
+    pos_atacante = find_player("A", novo_mapa)
+    pos_defensor = find_player("D", novo_mapa)
+
+    Se tipo_jogador == "A":
+        pos_atual = pos_atacante
+        pos_oponente = pos_defensor
+    Se tipo_jogador == "D":
+        pos_atual = pos_defensor
+        pos_oponente = pos_atacante
+
+    acao = encontra_melhor_caminho(tipo_jogador, pos_atual, pos_oponente, novo_mapa)
+
+    retorna acao
+
+
+
+encontra_melhor_caminho(tipo_jogador, pos_atual, pos_oponente, novo_mapa)
+
+    distancia_entre_oponentes = calcula_distancia_pontos(novo_mapa, pos_atual, pos_oponente)
+
+    Se tipo_jogador == "ATACANTE":
+        objetivo = saida_mais_distante_do_def(pos_atual,"LADO DIREITO", novo_mapa)
+    Se tipo_jogador == "DEFENSOR":
+        objetivo = pos_oponente
+
+    distancia_ate_objt_atac = calcula_distancia_pontos(novo_mapa, pos_atual, objetivo)
+    distancia_ate_objt_def = distancia_entre_oponentes    
+
+    Se tipo_jogador == "ATACANTE" e distancia_ate_objt_def < distancia_ate_objt_atac:
+        se_move(pos_atual, novo_mapa, "RIGHT")
+        
+
+    Se tipo_jogador == "DEFENSOR" distancia_ate_objt_atac < distancia_ate_objt_def:
+        se_move(pos_atual, novo_mapa, "RIGHT")        
+
+    retorna menor_caminho(pos_atual, objetivo, novo_mapa)
+
+estrategia_atacante(pos_atual, espiao, info):
+
+    Se Razão entre o [número de jogadas desde a última espiada] e o [menor 
+    número possível de jogadas até a sua vitória] > [incerteza permitida]:
+
+        novo_mapa = espiao.deixa_ver_mapa
+        info -> caminho = procura_melhor_acao("ATACANTE", novo_mapa)
+    
+    retorna info -> caminho -> proxima_direcao
+
