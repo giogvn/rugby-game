@@ -8,82 +8,52 @@
 #include "queue.h"
 #include "position.h"
 
-void init_queue(queue_t *q, int size)
+void init_queue(queue_t *q)
 {
-    q->elements = (position_t *)malloc(size * sizeof(position_t));
-    q->front = -1;
-    q->rear = -1;
-    q->size = size;
+    q->head = NULL;
+    q->tail = NULL;
 }
 
-void destroy_queue(queue_t *q, int size)
+void enqueue(queue_t *q, position_t data)
 {
-    free(q);
-}
-
-int is_empty(queue_t *q)
-{
-    return (q->front == -1 && q->rear == -1);
-}
-
-int is_full(queue_t *q)
-{
-    return (q->rear == q->size - 1);
-}
-
-void enqueue(queue_t *q, position_t element)
-{
-    if (is_full(q))
+    struct queue_node *new_node = (struct queue_node *)malloc(sizeof(struct queue_node));
+    new_node->data = data;
+    new_node->next = NULL;
+    if (q->tail == NULL)
     {
-        printf("Queue is full\n");
-        return;
-    }
-    else if (is_empty(q))
-    {
-        q->front = 0;
-        q->rear = 0;
+        q->head = new_node;
     }
     else
     {
-        q->rear++;
+        q->tail->next = new_node;
     }
-    q->elements[q->rear] = element;
+    q->tail = new_node;
 }
-
+void destroy_queue(queue_t *q)
+{
+    while (!is_empty(q))
+    {
+        dequeue(q);
+    }
+}
 position_t dequeue(queue_t *q)
 {
-    position_t element;
-    if (is_empty(q))
+    if (q->head == NULL)
     {
-        printf("Queue is empty\n");
-        position_t invalid_pos;
-        invalid_pos.i = -1;
-        invalid_pos.j = -1;
-        return invalid_pos;
+        printf("Error: Queue is empty\n");
+        return;
     }
-    else if (q->front == q->rear)
+    struct queue_node *head_node = q->head;
+    position_t data = head_node->data;
+    q->head = head_node->next;
+    free(head_node);
+    if (q->head == NULL)
     {
-        element = q->elements[q->front];
-        q->front = -1;
-        q->rear = -1;
+        q->tail = NULL;
     }
-    else
-    {
-        element = q->elements[q->front];
-        q->front++;
-    }
-    return element;
+    return data;
 }
-
-position_t front(queue_t *q)
+int is_empty(queue_t *q)
 {
-    if (is_empty(q))
-    {
-        printf("Queue is empty\n");
-        position_t invalid_pos;
-        invalid_pos.i = -1;
-        invalid_pos.j = -1;
-        return invalid_pos;
-    }
-    return q->elements[q->front];
+    return q->head == NULL;
 }

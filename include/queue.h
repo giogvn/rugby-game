@@ -8,21 +8,24 @@
 // Internal headers
 #include "position.h"
 
+struct queue_node
+{
+    position_t data;
+    struct queue_node *next;
+};
+
 struct queue
 {
-    position_t *elements;
-    int front;
-    int rear;
-    int size;
+    struct queue_node *head;
+    struct queue_node *tail;
 };
 typedef struct queue queue_t;
 
-void init_queue(queue_t *q, int size);
-void destroy_queue(queue_t *q, int size);
+void init_queue(queue_t *q);
+void destroy_queue(queue_t *q);
 int is_empty(queue_t *q);
 int is_full(queue_t *q);
 void enqueue(queue_t *q, position_t element);
 position_t dequeue(queue_t *q);
-position_t front(queue_t *q);
 
 #endif
