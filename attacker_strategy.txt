@@ -1,0 +1,133 @@
+AttackerStrategy:
+    While DISTANCE_FROM_CROSS_IS_MORE_THAN_ONE:
+        Do action_that_go_farthest_of_defender(Actions)
+    
+    Update actions To actions_to_go_to_the_goal_thats_farthest_than_last_goal
+
+Paths:
+    A Path is Acceptable if the Goal it is heading is Reachable
+Goals:
+    A Goal is Reachable if the RoundsOfGameLeft is less than the PathToGoal
+RoundsOfGameLeft:
+    The RoundsOfGameLeft is the difference between MaxNumberOfRounds and CurrentRound
+DistanceFromCross:
+    The DistanceFromCross is the difference between PlayerCurrentPosition and CrossPosition
+CrossPosition:
+    A CrossPosition is the point commom to the Paths AttackerCurrentPath and DefensorCurrentPath
+AttackerCurrentPath:
+    An AttackerCurrentPath is the Path the attacker is following in the CurrentRound
+
+CurrentRound:
+    A CurrentRound is made of:
+    - CurrRound: an Integer counting how many Rounds have happened since Round0
+    - CurrentPath: a Paths object
+    - RoundsOfGamesLeft: an Integer equal to Difference(MaxRounds, CurrRound)
+    
+    A CurrentRound can:
+    - Increment(CurrRound): every time a Player does an action;
+    - UpdateCurrentAttackerPath(AttackerPath): every time ChangesStrategy(Attacker)
+    - UpdateCurrentDefensorPath(DefensorPath): every time ChangesStrategy(Defensor)
+
+Paths:
+    A Path is made of:
+    - AttackerPath: the Actions the Attacker is taking to the CurrentAttackerGoal
+    - DefensorPath: the Actions the Defensor is taking to the CurrentDefensorGoal
+
+    A Path can:
+    - UpdateAttackerPath(UpdatedGoal): every time ChangesStrategy(Attacker)
+    - UpdateDefensorPath(UpdatedGoal): every time ChangesStrategy(Defensor)
+
+Goal:
+    A Goal is made of:
+    - Position: a Positon_t equal to some point in the CurrMap
+    - PathsToReach: an Integer representing Distance(Position, CurrentAttackerPosition)
+    A Goal can be:
+    - Reachable: iff Difference(PathsToReach, CurrentRound.RoundOfGamesLeft) > 0
+
+AttackerPath:
+    An AttackerPath is made of:
+    - Directions_t: the Attacker's next actions
+    An AttackerPath can:
+    - Reverse(Directions_t): invert the order in Directions_t
+
+DefensorPath:
+    A DefensorPath is made of:
+    - Directions_t: the Defensor's next actions
+    A DefensorPath can:
+    - Reverse(Directions_t): invert the order in Directions_t
+
+CrossPosition:
+    A CrossPosition is made of:
+    - Position_t: its position in the Map
+
+Attacker:
+    An Attacker is made of:
+    - CurrentMap
+    - CurrentRound
+    - Paths
+    - Goal
+    - CurrentAction
+    - CurrentAttackerGoal
+    - AttackerPath
+    - DefensorPath
+    - CrossPosition
+    - DistanceFromCross: an Integer representing the distance between
+        CurrentAttackerGoal and CrossPosition
+
+
+AttackerStrategy:
+    if Attacker.DistanceFromCross < 1:
+        NEW_MAP = defensor_spy(get_map)
+        NEW_GOAL = find_goal_to_attacker(Attacker.Goal, NEW_MAP)
+        if CAN_GO_BACKWWARDS:
+            attacker_curr_pos = go_backwards(curr_pos)
+            Attacker.Actions = bfs(attacker_curr_pos, NEW_GOAL)
+            Attacker.Actions = add_action(backwards_action, Attacker.Path)
+        else:
+            Attacker.Actions = bfs(curr_pos, NEW_GOAL)
+            Attacker.Actions = add_action(DIR_STAY, Attacker.Path)
+
+        Attacker.CurrentMap = NEW_MAP
+        Attacker.Goal = NEW_GOAL
+        CROSS_POINT = get_new_cross(NEW_GOAL, map, Attacker.Path)
+        Attacker.DistanceFromCross = distance_beween_points(attacker_curr_pos, CROSS_POINT)
+    
+    else:
+        Attacker.DistanceFromCross--
+
+    ACTION = Attacker.CurrentAction
+    UpdateAttackerCurrentAction(Attacker)        
+    Attacker.CurrentRound.CurrRound++
+    Attacker.CurrentRound.RoundsOfGameLeft--;
+    return ACTION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+StrategistAttacker:
+    A StrategistAttacker is made of:
+    - Attacker
+    - Defensor
+    A StrategistAttacker can:
+    - Increment(Attacker.CurrentRound.CurrRound)
+    - UpdateCurrentMap(CurrentMap)
+    - Decrement(Attacker.CurrRound.RoundsOfGameLeft)
+    - UpdateAttackerPath(Attacker.AttackerPath, Attacker.CurrentAttackerGoal)
+    - UpdateAttackerGoal()
+
+

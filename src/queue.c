@@ -38,13 +38,16 @@ void destroy_queue(queue_t *q)
 }
 position_t dequeue(queue_t *q)
 {
+    position_t data;
     if (q->head == NULL)
     {
         printf("Error: Queue is empty\n");
-        return;
+        data.i = -1;
+        data.j = -1;
+        return data;
     }
     struct queue_node *head_node = q->head;
-    position_t data = head_node->data;
+    data = head_node->data;
     q->head = head_node->next;
     free(head_node);
     if (q->head == NULL)

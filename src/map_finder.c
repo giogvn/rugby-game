@@ -21,9 +21,9 @@ position_t find_player(char player_type, Map map)
     position_t pos;
     char elem;
 
-    for (int i = 0; i < map_dims.height; i++)
+    for (int i = 0; i < (int)map_dims.height; i++)
     {
-        for (int j = 0; j < map_dims.width; j++)
+        for (int j = 0; j < (int)map_dims.width; j++)
         {
             pos.i = i;
             pos.j = j;
@@ -35,6 +35,7 @@ position_t find_player(char player_type, Map map)
             }
         }
     }
+    return pos;
 }
 int **initialize_matrix(int rows, int columns)
 {
@@ -69,6 +70,7 @@ direction_t **initialize_prev_actions(int rows, int columns)
 position_t *initialize_path(int size)
 {
     position_t *path = (position_t *)malloc(size * sizeof(position_t));
+    return path;
 }
 
 int **fill_matrix(int **matrix, int rows, int columns)
@@ -83,7 +85,25 @@ int **fill_matrix(int **matrix, int rows, int columns)
     return matrix;
 }
 
-void destroy_matrix(int **matrix, int columns, int rows)
+void destroy_visited(int **matrix, int rows)
+{
+    for (int i = 0; i < rows; i++)
+    {
+        free(matrix[i]);
+    }
+    free(matrix);
+}
+
+void destroy_positions(position_t **matrix, int rows)
+{
+    for (int i = 0; i < rows; i++)
+    {
+        free(matrix[i]);
+    }
+    free(matrix);
+}
+
+void destroy_directions(direction_t **matrix, int rows)
 {
     for (int i = 0; i < rows; i++)
     {
@@ -96,10 +116,10 @@ int possible_region(char content)
     return (content != 'X');
 }
 
-position_t *get_neighbors(position_t pos, direction_t *directions)
+position_t *get_neighbors(position_t pos, direction_t *directions, int size)
 {
-    position_t *neighbors = (position_t *)malloc(7 * sizeof(position_t));
-    for (int i = 0; i < 7; i++)
+    position_t *neighbors = (position_t *)malloc(size * sizeof(position_t));
+    for (int i = 0; i < size; i++)
     {
         neighbors[i] = move_position(pos, directions[i]);
     }
@@ -157,14 +177,14 @@ int bfs(position_t ini_pos, position_t goal, Map map, position_t *path, directio
             }
             path[path_length] = ini_pos;
             actions[path_length] = prev_actions[ini_pos.i][ini_pos.j];
-            destroy_matrix(prev_pos, map_height, map_width);
-            destroy_matrix(prev_actions, map_height, map_width);
-            destroy_matrix(visited, map_height, map_width);
+            destroy_positions(prev_pos, map_height);
+            destroy_directions(prev_actions, map_height);
+            destroy_visited(visited, map_height);
             destroy_queue(&q);
 
             return path_length;
         }
-        neighbors = get_neighbors(current, directions);
+        neighbors = get_neighbors(current, directions, 7);
         // Check the neighbors of the current position
         for (int i = 0; i < 7; i++)
         {
@@ -191,18 +211,62 @@ int bfs(position_t ini_pos, position_t goal, Map map, position_t *path, directio
         distance++;
         free(neighbors);
     }
-    destroy_matrix(visited, map_width, map_height);
+    destroy_visited(visited, map_width);
     destroy_queue(&q);
     return -1;
 }
 
-int main()
+position_t find_goal_to_attacker(position_t def_pos, Map map)
 {
-    Map map = new_map("/home/giovani/bcc/2023.1/mac218/miniep3/rugby-game/data/not_so_simple.map");
-    position_t start, goal;
+    dimension_t map_dims = get_map_dimension(map);
+    position_t candidate;
+    int map_height = map_dims.height;
+    int map_width = map_dims.width;
+    candidate.j = map_width - 2;
+    int curr_dist = 0;
+    int new_dist;
+    int candidate_row = 1;
+    position_t *path = initialize_path(map_width * map_height);
+    direction_t *actions = (direction_t *)malloc(map_width * map_height * sizeof(direction_t));
+    for (int row = 1; row < map_height; row++)
+    {
+        candidate.i = row;
+        new_dist = bfs(def_pos, candidate, map, path, actions);
+        if (new_dist > curr_dist)
+        {
+            curr_dist = new_dist;
+            candidate_row = row;
+        }
+    }
+    candidate.i = candidate_row;
+    free(path);
+    free(actions);
+    return candidate;
+}
+
+void add_action(direction_t new_action, direction_t *actions, dimension_t map_dims)
+{
+    int rows = map_dims.height;
+    int cols = map_dims.width;
+    direction_t new_dir;
+    direction_t old_dir = actions[0];
+    actions[0] = new_action;
+    for (int i = 1; i < rows * cols; i++)
+    {
+        new_dir = actions[i];
+        actions[i] = old_dir;
+        old_dir = new_dir;
+    }
+}
+
+/*int main()
+{
+    Map map = new_map("/home/giovani/bcc/2023.1/mac218/miniep3/rugby-game/data/simple.map");
+    position_t start, goal, def;
     start = find_player('A', map);
-    goal.i = 1;
-    goal.j = 8;
+    def = find_player('D', map);
+
+    goal = find_goal_to_attacker(def, map);
     dimension_t map_dims = get_map_dimension(map);
     int map_width = map_dims.width;
 
@@ -211,8 +275,9 @@ int main()
     direction_t *actions = (direction_t *)malloc(map_width * map_height * sizeof(direction_t));
     int dist = bfs(start, goal, map, path, actions);
     delete_map(map);
-    position_t pos;
+    position_t pos = path[0];
     printf("The path has size %d\n", dist);
+    // add_action((direction_t)DIR_STAY, actions, map_dims);
     for (int i = 0; i < dist; i++)
     {
         pos = path[i];
@@ -222,4 +287,4 @@ int main()
     free(path);
     free(actions);
     return 0;
-}
+}*/
