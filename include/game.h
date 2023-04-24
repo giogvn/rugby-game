@@ -16,14 +16,14 @@
  * A game represents a field with two players: an attacker and a defender.
  * The attacker and the defender try to compete with each other.
  */
-typedef struct game* Game;
+typedef struct game *Game;
 
 /**
  * A player strategy is a function to determine the direction of a player
  * given its current position in a Field. Aditionally, players can spy
  * on its opponent positions **at most** MAX_NUMBER_SPIES times.
  */
-typedef direction_t (*PlayerStrategy)(position_t, Spy, void* data);
+typedef direction_t (*PlayerStrategy)(position_t, Spy, void *data);
 
 // Functions
 Game new_game(
